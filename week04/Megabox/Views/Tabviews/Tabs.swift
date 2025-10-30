@@ -17,7 +17,9 @@ struct Tabs: View {
             
             // 2. "바로 예매" 탭
             Tab("바로 예매", systemImage: "movieclapper", value: 1) {
-                Text("바로 예매")
+                NavigationStack {
+                    MovieBookingView()
+                }
             }
             
             // 3. "모바일 오더" 탭

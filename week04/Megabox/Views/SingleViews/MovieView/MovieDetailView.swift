@@ -85,14 +85,10 @@ struct MovieDetailView: View {
                 .font(.semiBold14)
                 .foregroundColor(.grey03)
             Group{
-                
-                text(text: movie.movieDescription.detail1)
-                    .padding(.vertical)
-                
-                text(text: movie.movieDescription.detail2)
-                text(text: movie.movieDescription.detail3)
-                text(text: movie.movieDescription.detail4)
-                text(text: movie.movieDescription.detail5)
+                ForEach(movie.movieDescription.details, id: \.self) { detailLine in
+                    text(text: detailLine)
+                }
+               
             }
             .padding(.horizontal)
         }

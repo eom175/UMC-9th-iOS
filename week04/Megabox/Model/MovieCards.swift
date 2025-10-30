@@ -4,7 +4,7 @@ import Foundation
 
 struct MovieCards: Identifiable{
     
-    let id = UUID()
+    let id : String
     var image: Image
     var booking: Bool
     var movieName: String

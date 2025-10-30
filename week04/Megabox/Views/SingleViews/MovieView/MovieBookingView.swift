@@ -4,6 +4,15 @@ struct MovieBookingView: View {
     
     @StateObject private var viewModel = MovieBookingViewModel()
     
+    @State private var isShowingMovieSheet = false
+    
+    private var timeGridColumns: [GridItem] = [
+            GridItem(.flexible()),
+            GridItem(.flexible()),
+            GridItem(.flexible()),
+            GridItem(.flexible())
+        ]
+   
     
     // MARK: - Main Body
     var body: some View {
@@ -30,6 +39,8 @@ struct MovieBookingView: View {
                         theaterSelectionButtons
                         
                         dateSelectionView
+                        timeSelectionView
+                            
                     }
                     .padding(.horizontal)
                     .padding(.top)
@@ -40,7 +51,7 @@ struct MovieBookingView: View {
             
         }
     }
-    
+ 
     // MARK: - UI Components (분리된 서브 뷰)
     
     /// 1. 선택된 영화 정보를 보여주는 헤더 뷰
@@ -65,7 +76,12 @@ struct MovieBookingView: View {
                 .frame(width: 238, height: 24, alignment: .leading)
             
             
-            Button(action: {}, label: {
+            Button(action: {
+                
+                isShowingMovieSheet = true
+                
+                
+            }, label: {
                 Text("전체영화")
                     .font(.semiBold14)
                     .foregroundColor(.black)
@@ -77,6 +93,16 @@ struct MovieBookingView: View {
                             .stroke(Color.grey02, lineWidth: 1)
                     )
             })
+            .sheet(isPresented: $isShowingMovieSheet){
+                
+                MovieSheetView(viewModel: self.viewModel)
+                    .presentationDragIndicator(.visible)
+                
+                
+            }
+            
+            
+            
         }
         
     }
@@ -115,12 +141,12 @@ struct MovieBookingView: View {
         
     }
     
-
+// 4. 날짜 버튼들을 보여주는 뷰
     private var dateSelectionView: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 5) {
                 ForEach(viewModel.weekDates, id: \.self) { date in
-                    dateCell(for: date)
+                    dateButton(for: date)
                 }
             }
         }
@@ -131,7 +157,69 @@ struct MovieBookingView: View {
     }
     
     
+    private var timeSelectionView: some View {
+        
+   
+        // VStack으로 감싸서 여러 극장 정보를 세로로 나열합니다.
+        VStack(alignment: .leading, spacing: 25) {
+            
+            // ViewModel의 schedules 배열을 순회합니다. (예: "강남", "홍대"가 순서대로 들어옴)
+            ForEach(viewModel.schedules) { schedule in
+                
+                // --- 1. 극장 이름 (예: "강남") ---
+                Text(schedule.theaterName)
+                    .font(.bold18)
+                    .foregroundColor(.black)
+                
+                // --- 2. 상영관 목록 또는 "시간대 없음" ---
+                
+                // Check 1: "홍대", "신촌" (screens empty)
+                if schedule.screens.isEmpty {
+                    // "홍대", "신촌" 등 screens 배열이 비어있는 경우
+                    Text("해당 영화관에는 시간대가 없습니다.")
+                        .font(.system(size: 14))
+                        .foregroundColor(.gray)
+                        .padding(.vertical, 20)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                    
+                    // Check 2: "강남" (screens not empty)
+                } else {
+                    
+    
+                        VStack(spacing: 15) {
+                            
+                            // 이 극장의 모든 상영관(예: 1관, 2관...)을 순회
+                            ForEach(schedule.screens) { screen in
+                                
+                                // --- 상영관 이름 (예: "크리클라이너 1관") ---
+                                HStack {
+                                    Text(screen.screenName)
+                                        .font(.bold18)
+                                    Spacer()
+                                    Text(screen.format)
+                                        .font(.semiBold14)
+                                        .foregroundColor(.black)
+                                }
+                                
+                                // --- 시간표 그리드 ---
+                                LazyVGrid(columns: timeGridColumns, spacing: 19) {
+                                    ForEach(screen.times) { time in
+                                        timeCell(for: time) //
+                                    }
+                                }
+                            }
+                        }
+                }
+            }
+        }
+        // 3가지 조건이 모두 충족되어야만 보이도록 처리 (애니메이션과 함께)
+        .opacity(viewModel.isAllSelected ? 1.0 : 0.0)
+        .animation(.easeInOut, value: viewModel.isAllSelected)
+        .disabled(!viewModel.isAllSelected)
+    }
+    
     //------------------------------------
+    
     private func theaterButton(place: String) -> some View {
         
         
@@ -159,32 +247,36 @@ struct MovieBookingView: View {
     }
     
    
-       private func dateCell(for date: Date) -> some View {
+    // MovieBookingView.swift
 
-           
-           VStack(spacing: 4){
-               // "9.22" 형식으로 날짜 표시
-               Text(date.formatted(.dateTime.day()))
-                           .font(.bold18)
-               
-               // "오늘", "내일", "수" 형식으로 요일 표시
-               Text(formatWeekday(date))
-                   .font(.semiBold14)
-                   
-           }
-           .padding(.vertical,12)
-           .padding(.horizontal, 10)
-           .frame(width: 55, height: 60)
-           .foregroundColor(viewModel.selectedDate == date ? .white : getWeekdayColor(for: date))
-           .background(
-               RoundedRectangle(cornerRadius: 12)
-                .fill(viewModel.selectedDate == date ? .purple03: Color.clear)
-           )
-           .onTapGesture {
-               viewModel.selectDate(date)
-           }
-       }
-    
+    private func dateButton(for date: Date) -> some View {
+        
+        // 1. Button으로 감싸고 action을 정의합니다.
+        Button(action: {
+            // 2. 탭 했을 때 viewModel의 함수를 호출하는 것은 동일합니다.
+            viewModel.selectDate(date)
+        }) {
+            // 3. 기존 VStack은 Button의 Label(콘텐츠)이 됩니다.
+            VStack(spacing: 4){
+                Text(date.formatted(.dateTime.day()))
+                            .font(.bold18)
+                
+                Text(formatWeekday(date))
+                    .font(.semiBold14)
+                    
+            }
+            .padding(.vertical,12)
+            .padding(.horizontal, 10)
+            .frame(width: 55, height: 60)
+            .foregroundColor(viewModel.selectedDate == date ? .white : getWeekdayColor(for: date))
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(viewModel.selectedDate == date ? .purple03: Color.clear)
+            )
+        }
+       
+        .buttonStyle(.plain)
+    }
 
        private func getWeekdayColor(for date: Date) -> Color {
            let calendar = Calendar.current
@@ -209,6 +301,46 @@ struct MovieBookingView: View {
                return formatter.string(from: date)
            }
        }
+    
+    private func timeCell(for time: Time) -> some View {
+            VStack(spacing: 4) {
+                Spacer()
+                Text(time.startTime)
+                    .foregroundColor(.black)
+                    .font(.bold18)
+                    .frame(width: 55, height: 24)
+                    
+                
+                Text(time.endTime)
+                    .font(.regular12)
+                    .foregroundColor(.grey03)
+                    .frame(width: 55, height: 24)
+                    
+                
+                HStack(spacing: 4){
+                    
+                    Text("\(time.remainingSeats)")
+                        .foregroundColor(.purple03)
+                        .font(.semiBold14)
+                    
+                    Text("/")
+                    
+                    Text("\(time.totalSeats)")
+                        .foregroundColor(.grey03)
+                        .font(.semiBold14)
+                    
+                    
+                }
+                .frame(width:59, height: 20)
+                .padding(10)
+            }
+            .padding(10)
+            .frame(width: 75, height: 86)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(.grey02, lineWidth: 1)
+            )
+        }
 
 }
     
