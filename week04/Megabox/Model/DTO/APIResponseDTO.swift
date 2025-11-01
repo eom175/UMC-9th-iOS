@@ -19,8 +19,8 @@ struct MovieData: Codable{
 
 struct MovieDTO: Codable{
     
-    let id: String //--- id
-    let title: String //-- movieName
+    let id: String
+    let title: String
     let age_rating: String
     let schedules: [MovieInfoDTO]
     
@@ -37,25 +37,25 @@ struct MovieInfoDTO: Codable{
     
 }
 struct MovieAreaDTO: Codable{
-    let area: String // --theaterName
+    let area: String
     let items: [MovieItemsDTO]
     
 }
 
 struct MovieItemsDTO: Codable{
     
-    let auditorium: String // -- screenName
-    let format: String // -- format
+    let auditorium: String
+    let format: String
     let showtimes: [ShowTimesDTO]
     
     
 }
 struct ShowTimesDTO: Codable{
     
-    let start: String // -- startTime
-    let end: String // -- endTime
-    let available: Int //-- remainingSeats
-    let total: Int // -- totalSeats
+    let start: String
+    let end: String
+    let available: Int
+    let total: Int
     
   
     
@@ -66,12 +66,12 @@ extension ShowTimesDTO {
     // ShowTimesDTO(DTO) -> Time(Domain)
     func toDomain() -> Time {
         return Time(
-            // id는 Time 모델이 자동으로 생성
+         
             startTime: self.start,
-            endTime: "~\(self.end)", // 도메인 모델의 주석(~13:58)을 참고
-            remainingSeats: self.available, // DTO -> Domain
-            totalSeats: self.total        // DTO -> Domain
-        )
+            endTime: "~\(self.end)",
+            remainingSeats: self.available,
+            totalSeats: self.total
+            )
     }
 }
 extension MovieItemsDTO {
@@ -90,22 +90,14 @@ extension MovieAreaDTO {
     // MovieAreaDTO(DTO) -> TheaterSchedule(Domain)
     func toDomain() -> TheaterSchedule {
         return TheaterSchedule(
-            // id는 TheaterSchedule 모델이 자동으로 생성
-            theaterName: self.area, // DTO의 area -> Domain의 theaterName
-            // DTO의 [MovieItemsDTO] 배열을
-            // Domain의 [ScreenSchedule] 배열로 변환 (2번 함수 재사용)
+           
+            theaterName: self.area,
             screens: self.items.map { $0.toDomain() }
         )
     }
 }
 
-extension MovieInfoDTO{
-    
-    
-    
-    
-}
-// APIResponseDTO.swift 파일에 이미 정의된 매퍼
+
 extension MovieDTO {
     private func fetchLocalDescription(for movieID: String) -> MovieDescription {
             
@@ -154,12 +146,12 @@ extension MovieDTO {
         let description = fetchLocalDescription(for: self.id)
         return MovieCards(
             id: self.id,
-            image: Image(self.id), // DTO의 "m-001" ID로 에셋 이미지
+            image: Image(self.id),
             booking: true,
-            movieName: self.title, // DTO.title -> Domain.movieName
-            watchedStatus: "01", // DTO에 없는 정보 -> 앱의 비즈니스 로직
-            movieNameEn: "나중에", // DTO에 없는 정보 -> 앱의 비즈니스 로직
-            movieDescription: description// 별도 정의 필요
+            movieName: self.title,
+            watchedStatus: "01",
+            movieNameEn: "나중에",
+            movieDescription: description // 별도 정의한 description 사용
         )
     }
     

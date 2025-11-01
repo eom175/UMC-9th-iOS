@@ -149,11 +149,11 @@ struct MovieBookingView: View {
                     dateButton(for: date)
                 }
             }
-        }
-        // 극장이 선택되지 않았다면 전체적으로 반투명하게 처리
+        }  // 극장이 선택되지 않았다면 전체적으로 반투명하게 처리
         .opacity(viewModel.isDateSelectionEnabled ? 1.0 : 0.4)
         // 극장이 선택되지 않았다면 터치 불가
         .disabled(!viewModel.isDateSelectionEnabled)
+       
     }
     
     
@@ -212,10 +212,10 @@ struct MovieBookingView: View {
                 }
             }
         }
-        // 3가지 조건이 모두 충족되어야만 보이도록 처리 (애니메이션과 함께)
-        .opacity(viewModel.isAllSelected ? 1.0 : 0.0)
-        .animation(.easeInOut, value: viewModel.isAllSelected)
-        .disabled(!viewModel.isAllSelected)
+        // 'schedules 배열이 채워져있을때만 보이도록 
+        .opacity(!viewModel.schedules.isEmpty ? 1.0 : 0.0)
+        .animation(.easeInOut, value: !viewModel.schedules.isEmpty)
+        .disabled(viewModel.schedules.isEmpty)
     }
     
     //------------------------------------
@@ -251,9 +251,9 @@ struct MovieBookingView: View {
 
     private func dateButton(for date: Date) -> some View {
         
-        // 1. Button으로 감싸고 action을 정의합니다.
+       
         Button(action: {
-            // 2. 탭 했을 때 viewModel의 함수를 호출하는 것은 동일합니다.
+            
             viewModel.selectDate(date)
         }) {
             // 3. 기존 VStack은 Button의 Label(콘텐츠)이 됩니다.
@@ -273,6 +273,8 @@ struct MovieBookingView: View {
                 RoundedRectangle(cornerRadius: 12)
                     .fill(viewModel.selectedDate == date ? .purple03: Color.clear)
             )
+          
+            
         }
        
         .buttonStyle(.plain)
@@ -294,10 +296,10 @@ struct MovieBookingView: View {
            } else if calendar.isDateInTomorrow(date) {
                return "내일"
            } else {
-               // "월", "화", "수"... 형식으로 변환
+             
                let formatter = DateFormatter()
                formatter.locale = Locale(identifier: "ko_KR")
-               formatter.dateFormat = "E" // "E"는 요일을 한 글자로 표시
+               formatter.dateFormat = "E"
                return formatter.string(from: date)
            }
        }
