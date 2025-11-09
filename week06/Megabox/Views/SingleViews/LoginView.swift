@@ -1,11 +1,13 @@
 import SwiftUI
 
+
 struct LoginView: View {
 
  
-       @Environment(UserViewModel.self) private var userViewModel
-       //여기다가 먼저 저장한다음, 로그인이 될때 그 정보를 전역으로 전달
+    
+
        @State private var loginViewModel: LoginViewModel?
+       @Environment(UserViewModel.self) private var userViewModel
     
        @State private var usernameInput: String = ""
        @State private var passwordInput: String = ""
@@ -126,7 +128,14 @@ struct LoginView: View {
         HStack(spacing:73){
             
             Image("Naver")
-            Image("Kakao")
+            
+            Button {
+                loginViewModel?.loginWithKakao()
+            } label: {
+                Image("Kakao")
+            }
+
+           
             Image("Apple")
             
         }

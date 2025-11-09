@@ -75,7 +75,7 @@ struct UserInfoView: View {
                 
                 Button(action: {
                     print("변경")
-                    userViewModel.saveUsername(newUsername: newUsername)
+userViewModel.saveNewUserName(newUsername: newUsername)
                     
                       }) {
                           Text("변경")

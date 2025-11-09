@@ -35,6 +35,7 @@ struct ProfileView: View {
     }
     
     
+    
     private var profileHeader: some View {
         
         VStack(alignment: .leading){
@@ -54,7 +55,14 @@ struct ProfileView: View {
                     .background(Color.tag)
                     .cornerRadius(6)
                 
-                
+                Button(action: {
+                    // 3. 버튼 클릭 시 logout 함수 호출
+                    userViewModel.logout()
+                }) {
+                    Text("로그아웃")
+                        .font(.headline)
+                        .foregroundColor(.red)
+                }
                 Spacer()
                 
                 NavigationLink {

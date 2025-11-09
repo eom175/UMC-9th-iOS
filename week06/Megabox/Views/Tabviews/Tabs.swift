@@ -2,8 +2,6 @@ import SwiftUI
 
 struct Tabs: View {
     @State private var selectedTab = 0
-    
-    // @Environment 프로퍼티는 그대로 유지합니다.
     @Environment(UserViewModel.self) private var userViewModel
 
     var body: some View {
