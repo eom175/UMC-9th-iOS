@@ -9,8 +9,6 @@ class UserViewModel {
     
     private var tokenInfo: TokenInfo?
     
-    // --- Keychain 식별자 ---
-    // ⚠️ ".com"은 고유하지 않습니다. "com.eom175.myapp"처럼 실제 번들 ID 등으로 변경하세요.
     private let tokenService = ".com"
     private let tokenAccount = "userTokens"     // 토큰 저장을 위한 키
     private let usernameAccount = "username" // ⭐️ 아이디 저장을 위한 키 (추가)
@@ -47,7 +45,7 @@ class UserViewModel {
         // 1. 토큰 정보를 Keychain에 (Codable로) 저장
         KeychainService.shared.save(item: tokens, service: tokenService, account: tokenAccount)
         
-        // 2. ⭐️ 사용자 아이디를 Keychain에 (String으로) 저장
+        // 2. 사용자 아이디를 Keychain에 (String으로) 저장
         KeychainService.shared.saveString(username, service: tokenService, account: usernameAccount)
         
         // 3. ViewModel 상태 업데이트 (UI 변경 트리거)

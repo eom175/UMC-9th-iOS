@@ -10,41 +10,65 @@ import KakaoSDKUser
 
 @Observable
 class LoginViewModel {
-   
-    private var userViewModel: UserViewModel
-    private var loginAPIURL = " ff" //여기다가 실제 서버 API주소 연결
- 
-        init(userViewModel: UserViewModel) {
-            self.userViewModel = userViewModel
-        }
     
-    // 로그인 시도 함수
-    func login(username: String, password: String) {
-       
-        //서버에 전달한 파라미터
-        let parameters:[String : String] = [
-            "username" : username,
-            "password" : password
-        ]
-        
-        AF.request(loginAPIURL, method: .post, parameters: parameters, encoder: JSONParameterEncoder.default)
-            .validate(statusCode: 200..<300)
-            .responseDecodable(of: TokenInfo.self){
-                response in
-                switch response.result{
-                case .success(let tokenInfo):
-                    print("로그인 성공")
-                    DispatchQueue.main.sync{
-                        self.userViewModel.loginSuccess(username: username, tokens: tokenInfo)
-                        
-                
-                    }
-                case .failure(let error):
-                    print("로그인 실패: \(error.localizedDescription)")
-                }
-            }
+    private var userViewModel: UserViewModel
+    
+    // 1. 연습용
+    private let isMockMode = true //실제 API가 생기면 false로
+    
+    // 2. 실제 API 주소 (나중에 백엔드)
+    private var loginAPIURL = "https://api.my-server.com/login"
+ 
+    init(userViewModel: UserViewModel) {
+        self.userViewModel = userViewModel
     }
     
+    func login(username: String, password: String) {
+        
+        if isMockMode {
+            
+            print("[Mock Mode] 로그인 성공을 시뮬레이션합니다.")
+            
+            // (가상) 2초 딜레이 (서버 응답 시간 척하기)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                
+                // (가상) 서버로부터 받았다고 가정하는 가짜 토큰
+                let mockTokenInfo = TokenInfo(
+                    accessToken: "fake-access-token-for-\(username)",
+                    refreshToken: "fake-refresh-token-12345"
+                )
+                
+                // UserViewModel의 loginSuccess 함수를 직접 호출
+                self.userViewModel.loginSuccess(username: username, tokens: mockTokenInfo)
+            }
+            
+        } else {
+            //(실제 모드) isMockMode가 false일 때만 Alamofire 통신
+            
+            print("🚀 [Real Mode] 실제 서버로 로그인을 요청합니다.")
+            
+            let parameters:[String : String] = [
+                "username" : username,
+                "password" : password
+            ]
+         
+            //서버에서는 password맞는지 확인하고 다시 반환하지 않음, 대신에 토큰을 발급
+            AF.request(loginAPIURL, method: .post, parameters: parameters, encoder: JSONParameterEncoder.default)
+                .validate(statusCode: 200..<300)
+                .responseDecodable(of: TokenInfo.self) { response in
+                    switch response.result {
+                    case .success(let tokenInfo):
+                        print("로그인 성공")
+                        
+                        DispatchQueue.main.async {
+                            self.userViewModel.loginSuccess(username: username, tokens: tokenInfo)
+                        }
+                    case .failure(let error):
+                        print("로그인 실패: \(error.localizedDescription)")
+                    }
+                }
+        }
+    }
     // --- 카카오 로그인 함수 (이 함수가 fetchKakaoUserInfo를 호출) ---
         func loginWithKakao() {
             if (UserApi.isKakaoTalkLoginAvailable()) {
