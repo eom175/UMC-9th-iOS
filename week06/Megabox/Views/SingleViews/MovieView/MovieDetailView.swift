@@ -109,9 +109,19 @@ struct MovieDetailView: View {
     
     private var detailsView: some View {
         HStack(alignment:.top, spacing: 16) {
-            movie.image// 상세 정보 포스터 이미지 이름
-                .resizable()
-                .frame(width: 100, height: 120)
+            
+            // [수정] AsyncImage로 교체
+            AsyncImage(url: movie.posterURL) { image in
+                image
+                    .resizable() // 👈 기존 UI 수정자 유지
+                    .frame(width: 100, height: 120) // 👈 기존 UI 수정자 유지
+            } placeholder: {
+                // 원본 프레임과 동일한 크기의 플레이스홀더
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.gray.opacity(0.1))
+                    .frame(width: 100, height: 120)
+            }
+            .cornerRadius(8) // 👈 플레이스홀더에도 적용하기 위해 밖으로 이동
                 
             VStack(alignment: .leading, spacing: 8) {
                 Text("12세 이상 관람가")

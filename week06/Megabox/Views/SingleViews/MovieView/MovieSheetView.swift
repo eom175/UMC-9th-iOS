@@ -96,10 +96,19 @@ struct MovieSheetView: View {
             LazyVGrid(columns:movieGridColumns, spacing: 36){
                 ForEach(movies) { movie in
                     VStack{
-                        movie.image
-                            .resizable()
-                            .frame(width: 95, height: 135)
-                            .padding(8)
+                        // [수정] AsyncImage로 교체
+                        AsyncImage(url: movie.posterURL) { image in
+                            image
+                                .resizable() // 👈 기존 UI 수정자 유지
+                                .frame(width: 95, height: 135) // 👈 기존 UI 수정자 유지
+                        } placeholder: {
+                            // 원본 프레임과 동일한 크기의 플레이스홀더
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(Color.gray.opacity(0.1))
+                                .frame(width: 95, height: 135)
+                        }
+                        .cornerRadius(10) // 👈 플레이스홀더에도 적용하기 위해 밖으로 이동
+                        .padding(8)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 10)
                                     .stroke(viewModel.selectedMovieID == movie.id ? .purple03 : Color.clear, lineWidth: 4)

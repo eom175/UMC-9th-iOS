@@ -5,7 +5,7 @@ import Foundation
 struct MovieCards: Identifiable{
     
     let id : String
-    var image: Image
+    var posterURL: URL?
     var booking: Bool
     var movieName: String
     var watchedStatus: String

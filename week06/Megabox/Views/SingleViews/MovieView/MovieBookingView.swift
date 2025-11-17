@@ -112,11 +112,19 @@ struct MovieBookingView: View {
         ScrollView(.horizontal) {
             HStack(spacing: 8) {
                 ForEach(viewModel.movieCards) { movie in
-                    movie.image
-                        .resizable()
-                        .frame(width: 62, height: 89)
-                        .cornerRadius(10)
-                        .overlay(
+                    // [수정] AsyncImage로 교체
+                    AsyncImage(url: movie.posterURL) { image in
+                        image
+                            .resizable() // 👈 기존 UI 수정자 유지
+                            .frame(width: 62, height: 89) // 👈 기존 UI 수정자 유지
+                    } placeholder: {
+                        // 원본 프레임과 동일한 크기의 플레이스홀더
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(Color.gray.opacity(0.1))
+                            .frame(width: 62, height: 89)
+                    }
+                    .cornerRadius(10)
+                    .overlay(
                             RoundedRectangle(cornerRadius: 10)
                                 .stroke(viewModel.selectedMovieID == movie.id ? .purple03 : Color.clear, lineWidth: 4)
                         )
